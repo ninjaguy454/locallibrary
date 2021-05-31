@@ -1,17 +1,26 @@
-from django.shortcuts import render
+from django.http import request
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from catalog.models import Book, Author, BookInstance, Genre
 from django.views import generic
 from django.core.mail import send_mail
+from django.contrib.auth.models import User
+from .forms import EmailPostForm
 
-send_mail(
-    'Password Reset',
-    'Here is the link to reset your password',
-    'from@example.com',
-    ['to@example.com'],
-    fail_silently=False,
-)
-
+def post_share(request, post_id):
+    # Retrieve post by id
+    post = get_object_or_404(Post, id=post_id, status='published')
+    if request.method == 'POST':
+        # Form was submitted
+        form = EmailPostForm(request.POST)
+        if form.is_valid():
+            # Form fields passed validation
+            cd = form.cleaned_data
+            # ... send email
+    else:
+        form = EmailPostForm()
+    return render(request, 'blog/post/share.html', {'catalog': catalog,
+                                                    'form': form})
 class BookListView(generic.ListView):
     model = Book
     paginate_by = 2
